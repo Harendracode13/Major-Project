@@ -2,9 +2,10 @@
   "name": "Major-Project",
   "version": "1.0.0",
   "description": "This is a fullstack project.",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev":"nodemon src/index.js"
   },
   "keywords": [
     "node",
@@ -13,5 +14,8 @@
     "fullstack"
   ],
   "author": "Harendra Piprotar",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
 }
