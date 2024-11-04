@@ -1,0 +1,17 @@
+{
+  "name": "Major-Project",
+  "version": "1.0.0",
+  "description": "This is a fullstack project.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "node",
+    "react",
+    "learn",
+    "fullstack"
+  ],
+  "author": "Harendra Piprotar",
+  "license": "ISC"
+}
