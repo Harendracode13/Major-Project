@@ -71,3 +71,47 @@ const getAllVideos = asyncHandler(async (req, res) => {
         new ApiResponse
         (200,video,"Feched Video successfully"))
 })
+
+const publishAVideo = asyncHandler(async (req, res) => {
+  const { title, description } = req.body;
+  
+  if (!title || !description) {
+    throw new ApiError(400, "All Fields are required");
+  }
+
+  const videoFileLocalPath = req.files?.videoFile[0]?.path;
+  if (!videoFileLocalPath) {
+    throw new ApiError(400, "No video file found");
+  }
+  const videoFile = await uploadOnCloudinary(videoFileLocalPath);
+
+  if (!videoFile.url) {
+    throw new ApiError(500, "Error while uploading video file");
+  }
+
+  const thumbnailLocalPath = req.files?.thumbnail[0]?.path;
+  if (!thumbnailLocalPath) {
+    throw new ApiError(400, "No thumbnail file found");
+  }
+
+  const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+
+  if (!thumbnail.url) {
+    throw new ApiError(400, "Error while uploading thumbnail file");
+  }
+
+  const video = await Video.create({
+    videoFile: videoFile.url,
+    thumbnail: thumbnail.url,
+    title,
+    description,
+    duration: videoFile.duration,
+    owner: req.user._id,
+  });
+
+  if (!video) {
+    throw new ApiError(500, "Error while publishing the video");
+  }
+
+  return res.status(200).json(new ApiResponse(200, video, "Video Published"));
+});
