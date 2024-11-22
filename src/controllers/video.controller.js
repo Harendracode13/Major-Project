@@ -1,8 +1,9 @@
 import { asyncHandler} from "../utils/asyncHandler";
 import { Video } from "../models/video.model";
 import {ApiError} from "../utils/ApiError.js";
-import {uploadOnCloudinary} from "../utils/cloudinary.js";
+import {uploadOnCloudinary, deleteFromCloudinary} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { isValidObjectId } from "mongoose";
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const {
@@ -137,5 +138,76 @@ const getVideoById = asyncHandler(async (req, res) => {
     200,
     video.url,
     "Fecth video sucessfully"
+  )
+})
+
+const updateVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params
+
+  const {title, description}=req.body
+
+  const newThumbnailLocalPath=req.file?.path;
+
+  //TODO: update video details like title, description, thumbnail
+  if(!isValidObjectId(videoId)){
+    throw new ApiError(404,"invalid Video Id")
+  }
+
+  if(!title || !description)
+  {
+    throw new ApiError("give title and description for updation")
+  }
+
+  if(!newThumbnailLocalPath)
+  {
+      throw new ApiError(400,"give thumbnail");
+  }
+
+    const video =await Video.findById(videoId);
+
+    if(!video)
+    {
+      throw new ApiError(404,"video not found");
+    }
+
+    if(video.owner !== req.user._id)
+    {
+      throw new ApiError(400,"you are not allow for updateing the video");
+    }
+
+    const newThumbnail=await uploadOnCloudinary(newThumbnailLocalPath);
+
+    if(!newThumbnail.url)
+    {
+      throw new ApiError(500,"error while updateing thumbanai")
+    }
+
+    const deleteThumbnail=await deleteFromCloudinary(video.thumbnail);
+
+    if (deleteThumbnail.result !== "ok") {
+      throw new ApiError(
+        500,
+        "Error while deleting old thumbnail from cloudinary"
+      );
+    }
+
+      const updateVideo = await Video.findByIdAndUpdate(
+    videoId,
+    {
+      $set: {
+        title,
+        description,
+        thumbnail: newThumbnail.url,
+      },
+    },
+    { new: true }
+  );
+
+  return res
+  .status(200)
+  .json(
+    201,
+    updateVideo,
+    "video details update"
   )
 })
