@@ -286,3 +286,14 @@ return res
     )
   );
 });
+
+
+export{
+  getAllVideos,
+  publishAVideo,
+  getVideoById,
+  updateVideo,
+  deleteVideo,
+  togglePublishStatus,
+  };
+  
