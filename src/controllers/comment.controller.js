@@ -72,3 +72,6 @@ const getVideoComments = asyncHandler(async (req, res) => {
 			comments, 
 			"Comments Fetched"));
 })
+export{
+getVideoComments
+}
