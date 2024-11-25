@@ -70,7 +70,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     .stusts(200)
     .json(
         new ApiResponse
-        (200,video,"Feched Video successfully"))
+        (200,videos,"Feched Video successfully"))
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
