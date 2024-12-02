@@ -113,3 +113,8 @@ const toggleCommentLike=asyncHandler(async(req,res)=>{
         )
     )
 })
+
+export{
+    toggleVideoLike,
+    toggleCommentLike
+}
