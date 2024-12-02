@@ -97,4 +97,19 @@ const toggleCommentLike=asyncHandler(async(req,res)=>{
         )
     }
 
+    const unlikecomment=await Like.findByIdAndDelete(likedcomment._id)
+
+    if(!unlikecomment)
+    {
+        new ApiError(500,"error for server side")
+    }
+
+    return res.status(200)
+    .json(
+        new ApiResponse(
+            200,
+            unlikecomment,
+            "unlikeing the comment"
+        )
+    )
 })
