@@ -19,22 +19,42 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     }
     )
 
-    if(!likedvideo)
-    {
-        throw new ApiError(400,"erroe while likeing the video")
-    }
-    const like= await Like.create({
+    if(!likedvideo){
+       const like =await Like.create({
         video:videoId,
         likedBy:user
-    })
+       }
+    )
+      if(!like)
+      {
+        throw new ApiError(500,"liked not add in server")
+      }
 
-    if(!like)
+      return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    like,
+                    "Liked Video"
+                )
+            )
+    }
+    
+    const unlikedvideo=await Like.findByIdAndDelete(likedvideo._id);
+
+    if(!unlikedvideo)
     {
-        throw new ApiError(500,"erroe white adding like")
+        throw new ApiError(500,"serever error while unliked video")
     }
 
-    return res
-      .status(200)
-      .json(new ApiResponse(200, like, "User Liked the video")); 
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            unlikedvideo,
+            "unliked video"
+        )
+    )
+
 }
 )
