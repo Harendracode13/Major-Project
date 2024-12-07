@@ -6,5 +6,58 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 
 const createTweet = asyncHandler(async (req, res) => {
-    //TODO: create tweet
+          const { content } =req.body
+
+          if(!content)
+          {
+            throw new ApiError(400,"pleace fill the input filed")
+          }
+
+         const tweet= await Tweet.create(
+            {
+               content,
+               owner:req.user._id
+            }
+        )
+
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+               tweet,
+               "tweet is created"
+            )
+        )
+})
+
+const getUserTweets = asyncHandler(async (req, res) => {
+    const userId =req.params?.userId
+
+    if(!isValidObjectId(userId))
+    {
+        throw new ApiError(400,"give valid userid")
+    }
+
+  const tweet=  await Tweet.find({
+        owner:userId
+    })
+
+    if(tweet.length === 0 )
+    {
+        throw new ApiError(400,"no tweet is avaliable")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            {tweet},
+            "fecthed tweet successfully"
+        )
+    )
+
+
+
 })
