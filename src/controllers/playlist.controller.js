@@ -277,7 +277,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     
     const newVideo = [...(playList.videos),videoId]
     const newPlaylist = await Playlist.findByIdAndUpdate(
-        playList._id,
+        playlist._id,
         {
             $set:{
                 videos:newVideo
@@ -300,4 +300,57 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
             "Video added"
         )
     )
+})
+
+const removeVideoToPlaylist = asyncHandler(async(req,res)=>{
+    const {playlistId,videoId }=req.params
+
+    if(!isValidObjectId(playlistId) || !isValidObjectId(videoId))
+    {
+        throw new ApiError(400,"invalid videoid or playlistid")
+    }
+
+    const playlist=await Playlist.findById(playlistId);
+
+    if(!playlist)
+    {
+        throw new ApiError(400,"no playlist found")
+    }
+
+    if(!(playlist.owner).equals(req.user?._id)){
+        throw new ApiError(
+            400,
+            "you cannot allow to delete video in this playlist"
+        )
+    }
+
+    const newplaylistVideo=(playlist.videos).filter(v => v.toString() !== videoId)
+
+    const updatePlaylistVideo = await Playlist.findByIdAndUpdate(
+        playlist._id,
+        {
+            $set:{
+                videos:newplaylistVideo
+            }
+        },
+        {
+            new:true
+        }
+    )
+
+    if(!updatePlaylistVideo)
+    {
+        throw new ApiError(500,"error while removing video from playlist")
+    }
+
+    return res
+    .status(200)
+    .json(
+            new ApiResponse(
+                200,
+                updatePlaylistVideo,
+                "removed video successfully"
+            )
+    )
+
 })
