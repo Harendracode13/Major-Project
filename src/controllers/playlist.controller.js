@@ -140,3 +140,111 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
         )
     )
 })
+
+const getPlaylistById = asyncHandler(async (req, res) => {
+    const {playlistId} = req.params
+    
+    if(!isValidObjectId(playlistId))
+    {
+        throw new ApiError(400,"give valid playlistid")
+    }
+
+   const findplaylist= await Playlist.aggregate(
+        [
+            {
+                $match:{
+                    _id:new mongoose.Types.ObjectId(playlistId)
+                }
+            },
+            {
+                $lookup:{
+                     from:"users",
+                     localField:"owner",
+                    foreignField:"_id",
+                    as:"createdBy",
+                    pipeline:[
+                        {
+                            $project:{
+                                fullname:1,
+                                username:1,
+                                avatar:1
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+            $addFields:{
+                createdBy:{
+                    $first:"$createBy"
+                }
+            }
+            },
+            {
+                //videos
+                $lookup:{
+                    form:"videos",
+                    localField:"videos",
+                    foreignField:"_id",
+                    as:"videos",
+                    pipeline:[
+                        {
+                            $lookup:{
+                                from:"users",
+                                localField:"owner",
+                                foreignField:"_id",
+                                as:"owner",
+                            }
+                        },
+                        {
+                            $addFields:{
+                                owner:{
+                                    $first:"$owner"
+                                }
+                            }
+                        },
+                        {
+                            $project:{
+                                thumbnail:1,
+                                title:1,
+                                duration:1,
+                                views:1,
+                                owner:{
+                                    fullname:1,
+                                    username:1,
+                                    avatar:1
+                                },
+                                createdAt:1,
+                                updatedAt:1
+                            }
+                        }
+                    ]
+
+                }
+            },
+            {
+                $project:{
+                    name:1,
+                    description:1,
+                    videos:1,
+                    createdBy:1
+                }
+            }
+        ]
+    )
+
+    if(!findplaylist[0])
+    {
+        throw new ApiError(400,"No such Playlist found")  
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            findplaylist[0],
+           "Fetched playlist"
+        )
+    )
+})
