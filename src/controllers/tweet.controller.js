@@ -61,3 +61,46 @@ const getUserTweets = asyncHandler(async (req, res) => {
 
 
 })
+
+const updateTweet = asyncHandler(async (req, res) => {
+    //TODO: find tweet through tweet id
+    // valided tweet id 
+    //take new tweet and update
+    
+    const content=req.body
+
+    if(!content)
+    {
+        throw new ApiError(
+            400,
+            "fill input field"
+        )
+    }
+
+    const tweet=await Tweet.findById(req.params?.tweetId)
+
+    if(!((tweet?.owner).equals(req.user._id)))
+    {
+        throw new ApiError(401,"you are not allow to change tweet")
+    }
+
+    const updatetweet=await Tweet.findByIdAndUpdate(
+       
+            tweet._id,
+            {
+                $set:{
+                  content,
+                }
+            },
+            {new:true}
+    )
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            newTweet,
+            "Updated Tweet"
+        )
+    )
+
+})
