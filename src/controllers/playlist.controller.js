@@ -248,3 +248,56 @@ const getPlaylistById = asyncHandler(async (req, res) => {
         )
     )
 })
+
+const addVideoToPlaylist = asyncHandler(async (req, res) => {
+    const {playlistId,videoId }=req.params
+
+    if(!isValidObjectId(playlistId) || !isValidObjectId(videoId))
+    {
+        throw new ApiError(400,"invalid videoid or playlistid")
+    }
+
+    const playlist=await Playlist.findById(playlistId);
+
+    if(!playlist)
+    {
+        throw new ApiError(400,"no playlist found")
+    }
+
+    if(!(playlist.owner).equals(req.user?._id)){
+        throw new ApiError(
+            400,
+            "you cannot add video in this playlist"
+        )
+    }
+
+    if (playlist.videos.some(video => video.toString() === videoId)) {
+        throw new ApiError(400, "Video is already in the playlist");
+    }
+    
+    const newVideo = [...(playList.videos),videoId]
+    const newPlaylist = await Playlist.findByIdAndUpdate(
+        playList._id,
+        {
+            $set:{
+                videos:newVideo
+            }
+        },
+        {new:true}
+    )
+    if (!newPlaylist) {
+        throw new ApiError(
+            500,
+            "Error while Adding new video"
+        )
+    }
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            newPlaylist,
+            "Video added"
+        )
+    )
+})
