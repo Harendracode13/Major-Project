@@ -443,3 +443,13 @@ const updatePlaylist=asyncHandler(async(req,res)=>{
         )
     )
 })
+
+export{
+    createPlaylist,
+    getUserPlaylists,
+    getPlaylistById,
+    addVideoToPlaylist,
+    removeVideoToPlaylist,
+    deletePlaylist,
+    updatePlaylist
+}
