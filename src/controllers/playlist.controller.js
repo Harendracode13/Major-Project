@@ -389,3 +389,57 @@ const deletePlaylist = asyncHandler(async(req,res)=>{
             )
         )
 })
+
+const updatePlaylist=asyncHandler(async(req,res)=>{
+    const {playlistId} = req.params
+    const {name, description}=req.body
+
+    if(!(name || description))
+    {
+        throw new ApiError(400,"give name or description for updation")
+    }
+ 
+    if(isValidObjectId(playlistId))
+    {
+        throw new ApiError(400,"invlid playlistid")
+    }
+
+    const findPlaylist = await  Playlist.findById(playlistId)
+    if (!findPlaylist) {
+        throw new ApiError(
+            400,
+            "Not found playlist"
+        )
+    }
+    if (!((findPlaylist.owner).equals(req.user?._id))){
+        throw new ApiError(
+            400,
+            "You cannot delete it"
+        )
+    }
+    const updatedPlaylist = await Playlist.findByIdAndUpdate(
+        findPlaylist._id,
+        {
+            $set:{
+                name,
+                description
+            }
+        },
+        {new:true}
+    ) 
+    if (!updatedPlaylist) {
+        throw new ApiError(
+            400,
+            "Error while updating playlist"
+        )
+    }
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            updatedPlaylist,
+            "values updated"
+        )
+    )
+})
