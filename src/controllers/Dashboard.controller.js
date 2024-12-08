@@ -122,3 +122,44 @@ const getChannelstats=asyncHandler(async(req,res)=>{
         )
     )
 })
+
+const getChannelVideos = asyncHandler(async (req, res) => {
+    // TODO: Get all the videos uploaded by the channel
+    const videos = await Video.aggregate([
+        {
+            $match:{
+                owner:new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $project:{
+                videoFile:1,
+                thumbnail:1,
+                title:1,
+                duration:1,
+                views:1,
+                isPublished:1,
+                owner:1,
+                createdAt:1,
+                updatedAt:1
+            }
+        }
+    ])
+    if (videos.length < 1) {
+        throw new ApiError(404,"Not able to find videos")
+    }
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            videos,
+            "Fetched videos"
+        )
+    )
+})
+
+export {
+    getChannelStats, 
+    getChannelVideos
+    }
