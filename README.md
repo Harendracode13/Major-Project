@@ -1,2 +1,1 @@
-# This is youtube
-clone project
+# This is youtube clone project
